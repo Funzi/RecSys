@@ -59,11 +59,11 @@ class SlepeMapyData(object):
         self.batch_id = min(self.batch_id + batch_size, len(self.data))
         return batch_data, batch_labels, batch_seqlen
 
-train_path = "./trainDataset.csv"
-test_path = "./testDataset.csv"
+# train_path = "./trainDataset.csv"
+# test_path = "./testDataset.csv"
 ### DEBUG
-# train_path = "/home/dave/projects/recsys/trainDataset.csv"
-# test_path = "/home/dave/projects/recsys/testDataset.csv"
+train_path = "/home/dave/projects/recsys/trainDataset.csv"
+test_path = "/home/dave/projects/recsys/testDataset.csv"
 train_set = SlepeMapyData(train_path)
 test_set = SlepeMapyData(test_path)
 
@@ -73,7 +73,7 @@ num_steps = train_set.max_seq_len
 state_size = 64 # number of hidden neurons
 num_classes = 2 # number of classes
 echo_step = 0 # we do not need this, how much we should backpropagate
-batch_size = 50
+batch_size = 24
 num_batches = total_series_length//batch_size//num_steps
 learning_rate = 0.2
 
@@ -90,7 +90,7 @@ labels_series = tf.unstack(y, axis=1)
 
 # Forward passes
 cell = tf.nn.rnn_cell.BasicLSTMCell(state_size, state_is_tuple=True)
-#possible to add initial state initial_state=init_state,
+# possible to add initial state initial_state=init_state,
 output, current_state = tf.nn.dynamic_rnn(cell=cell, inputs=rnn_inputs,sequence_length=seqlen, dtype=tf.float32)
 
 with tf.variable_scope('softmax'):
@@ -135,14 +135,9 @@ train_step = tf.train.AdagradOptimizer(learning_rate).minimize(total_loss)
 
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
-    plt.ion()
-    plt.figure()
-    plt.show()
     loss_list = []
     
     for epoch_idx in range(num_epochs):
-        _current_cell_state = np.zeros((batch_size, state_size))
-        _current_hidden_state = np.zeros((batch_size, state_size))
         pred_labels = []
         correct_labels = []
         questions = []
@@ -160,22 +155,22 @@ with tf.Session() as sess:
                 })
 
            
-            for batch in batchY:
-                correct_labels.extend(batch)
-            for batch in batchX:
-                questions.extend(batch)
-            for something in _predictions_series: #list(map(list, zip(*_predictions_series))): # for model 2
-                for something2 in something:
-                    pred_labels.append(something2[1])
+            for question in batchY:
+                correct_labels.extend(question)
+            for question in batchX:
+                questions.extend(question)
+            for preditions in _predictions_series: #list(map(list, zip(*_predictions_series))): # for model 2
+                for prediction in preditions:
+                    pred_labels.append(prediction[1]) # second prediction is for probability of correct answer
                      
             loss_list.append(_total_loss)
 
             if step % 100 == 0:
                 print("Step",step, "Loss", _total_loss)
                 rmse = sqrt(mean_squared_error(pred_labels, correct_labels))
-                print(rmse)
+                print("Epoch train RMSE is: ",rmse)
 
-            
+            #TODO
             # fpr, tpr, thresholds = metrics.roc_curve(batchY[0], pred_labels, pos_label=1)
             # auc = metrics.auc(fpr, tpr)
 
@@ -192,22 +187,21 @@ with tf.Session() as sess:
                     f.write("\n")
        
         print("-----------------------")
-        losss, predss = sess.run([_total_loss,_predictions_series],
+        print("Calculating test set predictions")
+        test_loss, test_predictions = sess.run([total_loss, predictions_series],
                     feed_dict={
                         x:test_set.data,
                         y:test_set.labels,
-                        seqlen:test_set.seqlen
-                    })
+                        seqlen:test_set.seqlen})
         pred_labels = []
         correct_labels = []
-        for batch in test_set.labels:
-                correct_labels.extend(batch)
-        for batch in test_set.data:
-            questions.extend(batch)
-        for something in predss: #list(map(list, zip(*_predictions_series))): # for model 2
-            for something2 in something:
-                pred_labels.append(something2[1])
-        print(losss)
+        for label in test_set.labels:
+                correct_labels.extend(label)
+        for question in test_set.data:
+            questions.extend(question)
+        for preditions in test_predictions: #list(map(list, zip(*_predictions_series))): # for model 2
+            for prediction in preditions:
+                pred_labels.append(prediction[1])
+        print("Loss for test set:%.2f" % test_loss)
         rmse = sqrt(mean_squared_error(pred_labels, correct_labels))
-        print("Printing RMSE FOR TEST LABELS")
-        print(rmse)
+        print("RMSE for test set:%.2f" % rmse)
