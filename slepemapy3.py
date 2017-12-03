@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
 
-STUDENTS_COUNT = 39709
+STUDENTS_COUNT = 44098
 
 def read_dataset(path):
     data = []
@@ -26,17 +26,18 @@ def read_dataset(path):
             continue
         elif (count % 3) == 1:
             data.append(list(map(lambda x:int(x), line_data)))
-            seq_len.append(len(line_data))
+            seq_len.append(len(line_data) - 1)
             count += 1
         elif (count % 3) == 2:
             labels.append(list(map(lambda x:int(x), line_data)))
             count += 1
+            
         if count >= STUDENTS_COUNT*3:
             break
     add_padding(data, max_seq_len)
     add_padding(labels, max_seq_len)
 
-    return data, labels, seq_len, max_seq_len
+    return data, labels, seq_len, max_seq_len 
 
 def add_padding(data, length):
     for entry in data:
@@ -59,11 +60,11 @@ class SlepeMapyData(object):
         self.batch_id = min(self.batch_id + batch_size, len(self.data))
         return batch_data, batch_labels, batch_seqlen
 
-# train_path = "./trainDataset.csv"
-# test_path = "./testDataset.csv"
+train_path = "./trainDataset.csv"
+test_path = "./testDataset.csv"
 ### DEBUG
-train_path = "/home/dave/projects/recsys/trainDataset.csv"
-test_path = "/home/dave/projects/recsys/testDataset.csv"
+#train_path = "/home/dave/projects/datasets/builder_train.csv"
+#test_path = "/home/dave/projects/datasets/builder_test.csv"
 train_set = SlepeMapyData(train_path)
 test_set = SlepeMapyData(test_path)
 
@@ -73,10 +74,11 @@ num_steps = train_set.max_seq_len
 state_size = 64 # number of hidden neurons
 num_classes = 2 # number of classes
 echo_step = 0 # we do not need this, how much we should backpropagate
-batch_size = 24
+batch_size = 50
 num_batches = total_series_length//batch_size//num_steps
-learning_rate = 0.2
+learning_rate = 0.1
 
+    
 #
 #  MODEL 1
 #
@@ -87,12 +89,12 @@ seqlen = tf.placeholder(tf.int32, [None])
 inputs_series = tf.split(x,num_steps, 1)
 rnn_inputs = tf.one_hot(x, num_classes)
 labels_series = tf.unstack(y, axis=1)
-
+# 
 # Forward passes
 cell = tf.nn.rnn_cell.BasicLSTMCell(state_size, state_is_tuple=True)
 # possible to add initial state initial_state=init_state,
 output, current_state = tf.nn.dynamic_rnn(cell=cell, inputs=rnn_inputs,sequence_length=seqlen, dtype=tf.float32)
-
+# embedding one how vector tf.nn.embeddinglookup
 with tf.variable_scope('softmax'):
     W = tf.get_variable('W', [state_size, num_classes])
     b = tf.get_variable('b', [num_classes], initializer=tf.constant_initializer(0.0))
@@ -140,6 +142,8 @@ with tf.Session() as sess:
     for epoch_idx in range(num_epochs):
         pred_labels = []
         correct_labels = []
+        pred_labels_without0 = []
+        correct_labels_without0 = []
         questions = []
         print("New data, epoch", epoch_idx)
 
@@ -155,27 +159,34 @@ with tf.Session() as sess:
                 })
 
            
-            for question in batchY:
-                correct_labels.extend(question)
+            for label in batchY:
+                correct_labels.extend(label)
             for question in batchX:
                 questions.extend(question)
             for preditions in _predictions_series: #list(map(list, zip(*_predictions_series))): # for model 2
                 for prediction in preditions:
                     pred_labels.append(prediction[1]) # second prediction is for probability of correct answer
-                     
+            for i in range(len(correct_labels)):
+                if questions[i] != 0:
+                    pred_labels_without0.append(correct_labels[i])
+                    correct_labels_without0.append(pred_labels[i])       
+            
             loss_list.append(_total_loss)
 
             if step % 100 == 0:
                 print("Step",step, "Loss", _total_loss)
-                rmse = sqrt(mean_squared_error(pred_labels, correct_labels))
+                rmse = sqrt(mean_squared_error(pred_labels_without0, correct_labels_without0))
                 print("Epoch train RMSE is: ",rmse)
+                with open('results.txt','a') as f:
+                    f.write("Step %.2f Loss %.2f \n" % (step, _total_loss))
+                    f.write("Epoch train RMSE is: %.2f \n" % rmse)
 
-            #TODO
+            # TODO
             # fpr, tpr, thresholds = metrics.roc_curve(batchY[0], pred_labels, pos_label=1)
             # auc = metrics.auc(fpr, tpr)
 
             # #calculate r^2
-            # r2 = r2_score(batchY[0], pred_labels)
+            # r2 = r2_score(batchY[0], pred_labels)#
 
 
         with open('predictions.txt','a') as f:
@@ -188,20 +199,26 @@ with tf.Session() as sess:
        
         print("-----------------------")
         print("Calculating test set predictions")
-        test_loss, test_predictions = sess.run([total_loss, predictions_series],
-                    feed_dict={
-                        x:test_set.data,
-                        y:test_set.labels,
-                        seqlen:test_set.seqlen})
-        pred_labels = []
-        correct_labels = []
-        for label in test_set.labels:
-                correct_labels.extend(label)
-        for question in test_set.data:
-            questions.extend(question)
-        for preditions in test_predictions: #list(map(list, zip(*_predictions_series))): # for model 2
-            for prediction in preditions:
-                pred_labels.append(prediction[1])
-        print("Loss for test set:%.2f" % test_loss)
-        rmse = sqrt(mean_squared_error(pred_labels, correct_labels))
-        print("RMSE for test set:%.2f" % rmse)
+        # test_loss, test_predictions = sess.run([total_loss, predictions_series],
+        #             feed_dict={
+        #                 x:test_set.data,
+        #                 y:test_set.labels,
+        #                 seqlen:test_set.seqlen})
+        # pred_labels = []
+        # correct_labels = []
+        # pred_labels_without0 = []
+        # correct_labels_without0 = []
+        # for label in test_set.labels:
+        #         correct_labels.extend(label)
+        # for question in test_set.data:
+        #     questions.extend(question)
+        # for preditions in test_predictions: #list(map(list, zip(*_predictions_series))): # for model 2
+        #     for prediction in preditions:
+        #         pred_labels.append(prediction[1])
+        # for i in range(len(correct_labels)):
+        #         if questions[i] != 0:
+        #             pred_labels_without0.append(correct_labels[i])
+        #             correct_labels_without0.append(pred_labels[i])
+        # print("Loss for test set:%.2f" % test_loss)
+        # rmse = sqrt(mean_squared_error(pred_labels_without0, correct_labels_without0))
+        # print("RMSE for test set:%.2f" % rmse)
