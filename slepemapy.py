@@ -69,11 +69,11 @@ class SlepeMapyData(object):
         self.batch_id = min(self.batch_id + batch_size, len(self.data))
         return batch_data, batch_labels, batch_target, batch_input_correct, batch_seqlen
 
-#train_path = "./trainDataset.csv"
-#test_path = "./testDataset.csv"
+train_path = "./trainDataset.csv"
+test_path = "./testDataset.csv"
 ### DEBUG
-train_path = "/home/dave/projects/datasets/builder_train.csv"
-test_path = "/home/dave/projects/datasets/builder_test.csv"
+#train_path = "/home/dave/projects/datasets/builder_train.csv"
+#test_path = "/home/dave/projects/datasets/builder_test.csv"
 train_set = SlepeMapyData(train_path)
 test_set = SlepeMapyData(test_path)
 
