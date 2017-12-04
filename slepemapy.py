@@ -6,8 +6,9 @@ from sklearn import metrics
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
+from copy import deepcopy
 
-STUDENTS_COUNT = 100
+STUDENTS_COUNT = 50000
 
 def read_dataset(path):
     data = []
@@ -60,8 +61,8 @@ class SlepeMapyData(object):
         batch_target = batch_data
         batch_input_correct = batch_labels
         for i in range(batch_size):
-            temp = batch_data[i].copy()
-            temp2 = batch_labels[i].copy()
+            temp = deepcopy(batch_data[i])#.copy()
+            temp2 = deepcopy(batch_labels[i])#.copy()
             batch_data[i] = batch_data[i][:-1]
             batch_target[i] = temp[1:]
             batch_labels[i] = batch_labels[i][1:]
@@ -69,24 +70,24 @@ class SlepeMapyData(object):
         self.batch_id = min(self.batch_id + batch_size, len(self.data))
         return batch_data, batch_labels, batch_target, batch_input_correct, batch_seqlen
 
-train_path = "./trainDataset.csv"
-test_path = "./testDataset.csv"
+train_path = "./builder_train_world_first.csv"
+test_path = "./builder_test_world_first.csv"
 ### DEBUG
 #train_path = "/home/dave/projects/datasets/builder_train.csv"
 #test_path = "/home/dave/projects/datasets/builder_test.csv"
 train_set = SlepeMapyData(train_path)
 test_set = SlepeMapyData(test_path)
 
-num_epochs = 10
+num_epochs = 1000
 total_series_length = train_set.max_seq_len * STUDENTS_COUNT 
 num_steps = train_set.max_seq_len 
-state_size = 1000 # number of hidden neurons
-num_classes = 1000# number of classes
+state_size = 256 # number of hidden neurons
+num_classes = 1500# number of classes
 echo_step = 0 # we do not need this, how much we should backpropagate
 batch_size = 50
 num_batches = total_series_length//batch_size//num_steps
 learning_rate = 0.1
-num_skills = 1000
+num_skills = 1500
     
 #
 #  MODEL 1
@@ -120,6 +121,8 @@ with tf.variable_scope('softmax'):
 logits = tf.reshape(tf.matmul(tf.reshape(output, [-1, state_size]), W) + b,
             [-1, num_steps, num_classes])
 predictions_series = tf.sigmoid(logits)
+#msqrt = tf.sqrt(tf.reduce_sum(tf.square(predictions_series - target_label_s) * target_one_hot)
+
 #TODO transfer logits to take only ones according to target id in question
 #logits = tf.reshape(logits, [batch_size])
 selected_logits = tf.reshape(logits,[-1,num_classes])
@@ -166,14 +169,14 @@ with tf.Session() as sess:
     loss_list = []
     
     for epoch_idx in range(num_epochs):
-        pred_labels = []
-        correct_labels = []
-        pred_labels_without0 = []
-        correct_labels_without0 = []
-        questions = []
         print("New data, epoch", epoch_idx)
 
         for step in range(num_batches):
+            pred_labels = []
+            correct_labels = []
+            pred_labels_without0 = []
+            correct_labels_without0 = []
+            questions = []
             batch_X, batch_Y, batch_target_X, batch_target_Y, batch_seq = train_set.next(batch_size)
 
             _total_loss, _train_step, _predictions_series = sess.run(
@@ -187,29 +190,29 @@ with tf.Session() as sess:
                 })
 
            
-            for label in batch_Y:
-                correct_labels.extend(label)
-            for question in batch_X:
-                questions.extend(question)
-            i = 0
-            for predictions in _predictions_series: #list(map(list, zip(*_predictions_series))): # for model 2
-                j = 0
-                for prediction in predictions:
-                    pred_labels.append(prediction[questions[i*(num_steps-1) + j]]) # second prediction is for probability of correct answer
-                    j+=1
-                i+=1
-            
-            for i in range(len(correct_labels)):
-                if questions[i] != 0:
-                    pred_labels_without0.append(correct_labels[i])
-                    correct_labels_without0.append(pred_labels[i])       
-            
-            loss_list.append(_total_loss)
-
             if step % 100 == 0:
+                for label in batch_Y:
+                    correct_labels.extend(label)
+                for question in batch_X:
+                    questions.extend(question)
+                i = 0
+                for predictions in _predictions_series: #list(map(list, zip(*_predictions_series))): # for model 2
+                    j = 0
+                    for prediction in predictions:
+                        pred_labels.append(prediction[questions[i*num_steps + j]]) # second prediction is for probability of correct answer
+                        j+=1
+                    i+=1
+            
+                for i in range(len(correct_labels)):
+                    if questions[i] != 0:
+                        pred_labels_without0.append(correct_labels[i])
+                        correct_labels_without0.append(pred_labels[i])       
+            
+                loss_list.append(_total_loss)
+
                 print("Step",step, "Loss", _total_loss)
                 rmse = sqrt(mean_squared_error(pred_labels_without0, correct_labels_without0))
-                print("Epoch train RMSE is: ",rmse)
+                print("Epoch train RMSE is: ", rmse)
                 with open('results.txt','a') as f:
                     f.write("Step %.2f Loss %.2f \n" % (step, _total_loss))
                     f.write("Epoch train RMSE is: %.2f \n" % rmse)
@@ -221,7 +224,40 @@ with tf.Session() as sess:
             # r2 = r2_score(batchY[0], pred_labels)#
 
 
-        with open('predictions.txt','a') as f:
+        test_predictions = sess.run(predictions_series,
+                        feed_dict={
+                            x:np.array(test_set.data)[:,1:],
+                            y:np.array(test_set.labels)[:,1:],
+                            seqlen:test_set.max_seq_len})
+        pred_labels = []
+        correct_labels = []
+        pred_labels_without0 = []
+        correct_labels_without0 = []
+	questions = []
+        for label in np.array(test_set.labels)[:,1:]:
+                correct_labels.extend(label)
+        for question in np.array(test_set.data)[:,1:]:
+            questions.extend(question)
+	i = 0
+        for predictions in test_predictions: #list(map(list, zip(*_predictions_series))): # for model 2
+            j = 0
+            for prediction in predictions:
+	 #print(test_set.max_seq_len, len(questions), len(prediction))
+	 #print(i * test_set.max_seq_len + j)
+	 #print(questions[i * (test_set.max_seq_len) + j])
+                pred_labels.append(prediction[questions[i*(test_set.max_seq_len) + j]]) # second prediction is for probability of correct answer
+                j+=1
+            i+=1
+        for i in range(len(correct_labels)):
+                if questions[i] != 0:
+                    pred_labels_without0.append(correct_labels[i])
+                    correct_labels_without0.append(pred_labels[i])
+#         print("Loss for test set:%.2f" % test_loss)
+        rmse = sqrt(mean_squared_error(pred_labels_without0, correct_labels_without0))
+        print("RMSE for test set:%.2f" % rmse)
+
+
+        with open('predictions.txt','w') as f:
             for i in range(len(correct_labels)):
                 if questions[i] != 0:
                     f.write('question ID is: %d' % questions[i])
@@ -231,26 +267,3 @@ with tf.Session() as sess:
        
         print("-----------------------")
         print("Calculating test set predictions")
-        # test_loss, test_predictions = sess.run([total_loss, predictions_series],
-        #             feed_dict={
-        #                 x:test_set.data,
-        #                 y:test_set.labels,
-        #                 seqlen:test_set.seqlen})
-        # pred_labels = []
-        # correct_labels = []
-        # pred_labels_without0 = []
-        # correct_labels_without0 = []
-        # for label in test_set.labels:
-        #         correct_labels.extend(label)
-        # for question in test_set.data:
-        #     questions.extend(question)
-        # for preditions in test_predictions: #list(map(list, zip(*_predictions_series))): # for model 2
-        #     for prediction in preditions:
-        #         pred_labels.append(prediction[1])
-        # for i in range(len(correct_labels)):
-        #         if questions[i] != 0:
-        #             pred_labels_without0.append(correct_labels[i])
-        #             correct_labels_without0.append(pred_labels[i])
-        # print("Loss for test set:%.2f" % test_loss)
-        # rmse = sqrt(mean_squared_error(pred_labels_without0, correct_labels_without0))
-        # print("RMSE for test set:%.2f" % rmse)
