@@ -8,7 +8,7 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from copy import deepcopy
 
-STUDENTS_COUNT = 50000
+STUDENTS_COUNT = 28000
 
 def read_dataset(path):
     data = []
@@ -70,8 +70,8 @@ class SlepeMapyData(object):
         self.batch_id = min(self.batch_id + batch_size, len(self.data))
         return batch_data, batch_labels, batch_target, batch_input_correct, batch_seqlen
 
-train_path = "./builder_train_world_first.csv"
-test_path = "./builder_test_world_first.csv"
+train_path = "./trainDataset.csv"
+test_path = "./testDataset.csv"
 ### DEBUG
 #train_path = "/home/dave/projects/datasets/builder_train.csv"
 #test_path = "/home/dave/projects/datasets/builder_test.csv"
@@ -228,7 +228,7 @@ with tf.Session() as sess:
                         feed_dict={
                             x:np.array(test_set.data)[:,1:],
                             y:np.array(test_set.labels)[:,1:],
-                            seqlen:test_set.max_seq_len})
+                            seqlen:test_set.seqlen})
         pred_labels = []
         correct_labels = []
         pred_labels_without0 = []
