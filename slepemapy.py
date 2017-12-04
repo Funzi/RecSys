@@ -77,7 +77,7 @@ test_path = "/home/dave/projects/datasets/builder_test.csv"
 train_set = SlepeMapyData(train_path)
 test_set = SlepeMapyData(test_path)
 
-num_epochs = 5
+num_epochs = 10
 total_series_length = train_set.max_seq_len * STUDENTS_COUNT 
 num_steps = train_set.max_seq_len 
 state_size = 1000 # number of hidden neurons
@@ -92,16 +92,21 @@ num_skills = 1000
 #  MODEL 1
 #
 x = tf.placeholder(tf.int32, [None, num_steps])
-
 y = tf.placeholder(tf.float32, [None, num_steps])
 seqlen = tf.placeholder(tf.int32, [None])
 target = tf.placeholder(tf.int32, [None, num_steps])
 target_label = tf.placeholder(tf.float32, [None, num_steps])
-
+#-----------
 inputs_series = tf.split(x,num_steps, 1)
+
+target_label_s = tf.reshape(target_label,[-1, num_steps, 1])
+target_label_s = tf.tile(target_label_s, [1,1, num_classes])
+target_one_hot = tf.one_hot(target, num_skills)
 rnn_inputs = tf.one_hot(x, num_skills)
+y_2 = tf.reshape(y,[-1,num_steps,1])
+rnn_inputs = tf.concat([rnn_inputs,y_2], axis=2)
 # TODO append y label to input to pass that information to the enxt output
-labels_series = tf.unstack(y, axis=1)
+labels_series = tf.unstack(target, axis=1)
 # 
 # Forward passes
 cell = tf.nn.rnn_cell.BasicLSTMCell(state_size, state_is_tuple=True)
@@ -117,9 +122,11 @@ logits = tf.reshape(tf.matmul(tf.reshape(output, [-1, state_size]), W) + b,
 predictions_series = tf.sigmoid(logits)
 #TODO transfer logits to take only ones according to target id in question
 #logits = tf.reshape(logits, [batch_size])
-selected_logits = tf.gather(logits, 0, axis=2)
+selected_logits = tf.reshape(logits,[-1,num_classes])
+selected_logits = tf.gather(selected_logits, target, axis=1)
 
-losses = tf.nn.sigmoid_cross_entropy_with_logits(labels=target_label, logits=selected_logits)
+losses = tf.nn.sigmoid_cross_entropy_with_logits(labels=target_label_s, logits=logits)
+losses = tf.reduce_sum(losses * target_one_hot, axis=-1)
 total_loss = tf.reduce_mean(losses)
 # TODO is it training after every step or after whoel sequence? 
 # TODO is it training whole final hidden layer or only selected logits ?
