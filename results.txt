@@ -1,144 +1,32 @@
 Step 0.00 Loss 0.69 
 Epoch train RMSE is: 0.50 
-Step 100.00 Loss 0.42 
-Epoch train RMSE is: 0.48 
-Step 200.00 Loss 0.40 
-Epoch train RMSE is: 0.42 
-Step 300.00 Loss 0.32 
-Epoch train RMSE is: 0.37 
-Step 400.00 Loss 0.34 
-Epoch train RMSE is: 0.41 
-Step 500.00 Loss 0.29 
-Epoch train RMSE is: 0.42 
+Step 100.00 Loss 0.22 
+Epoch train RMSE is: 0.50 
+Step 200.00 Loss 0.15 
+Epoch train RMSE is: 0.50 
+Step 300.00 Loss 0.13 
+Epoch train RMSE is: 0.50 
+Step 400.00 Loss 0.08 
+Epoch train RMSE is: 0.50 
+Step 500.00 Loss 0.08 
+Epoch train RMSE is: 0.50 
+Step 600.00 Loss 0.08 
+Epoch train RMSE is: 0.50 
+Step 700.00 Loss 0.07 
+Epoch train RMSE is: 0.50 
+Step 800.00 Loss 0.07 
+Epoch train RMSE is: 0.50 
+Step 900.00 Loss 0.06 
+Epoch train RMSE is: 0.50 
 Step 0.00 Loss 0.69 
 Epoch train RMSE is: 0.50 
-Step 100.00 Loss 0.42 
-Epoch train RMSE is: 0.48 
-Step 200.00 Loss 0.40 
-Epoch train RMSE is: 0.42 
-Step 300.00 Loss 0.32 
-Epoch train RMSE is: 0.37 
-Step 400.00 Loss 0.34 
-Epoch train RMSE is: 0.41 
-Step 500.00 Loss 0.29 
-Epoch train RMSE is: 0.42 
-Step 0.00 Loss 0.27 
-Epoch train RMSE is: 0.33 
-Step 100.00 Loss 0.28 
-Epoch train RMSE is: 0.40 
-Step 200.00 Loss 0.33 
-Epoch train RMSE is: 0.39 
-Step 300.00 Loss 0.27 
-Epoch train RMSE is: 0.34 
-Step 400.00 Loss 0.30 
-Epoch train RMSE is: 0.38 
-Step 500.00 Loss 0.25 
-Epoch train RMSE is: 0.39 
-Step 0.00 Loss 0.23 
-Epoch train RMSE is: 0.30 
-Step 100.00 Loss 0.24 
-Epoch train RMSE is: 0.36 
-Step 200.00 Loss 0.28 
-Epoch train RMSE is: 0.35 
-Step 300.00 Loss 0.22 
-Epoch train RMSE is: 0.30 
-Step 400.00 Loss 0.24 
-Epoch train RMSE is: 0.33 
-Step 500.00 Loss 0.21 
-Epoch train RMSE is: 0.33 
-Step 0.00 Loss 0.19 
-Epoch train RMSE is: 0.25 
-Step 100.00 Loss 0.18 
-Epoch train RMSE is: 0.28 
-Step 200.00 Loss 0.19 
-Epoch train RMSE is: 0.25 
-Step 300.00 Loss 0.15 
-Epoch train RMSE is: 0.19 
-Step 400.00 Loss 0.14 
-Epoch train RMSE is: 0.18 
-Step 500.00 Loss 0.12 
-Epoch train RMSE is: 0.16 
-Step 0.00 Loss 0.13 
-Epoch train RMSE is: 0.10 
-Step 100.00 Loss 0.11 
-Epoch train RMSE is: 0.12 
-Step 200.00 Loss 0.10 
-Epoch train RMSE is: 0.11 
-Step 300.00 Loss 0.10 
-Epoch train RMSE is: 0.09 
-Step 400.00 Loss 0.09 
-Epoch train RMSE is: 0.09 
-Step 500.00 Loss 0.10 
-Epoch train RMSE is: 0.09 
-Step 0.00 Loss 0.11 
-Epoch train RMSE is: 0.05 
-Step 100.00 Loss 0.09 
-Epoch train RMSE is: 0.08 
-Step 200.00 Loss 0.08 
-Epoch train RMSE is: 0.08 
-Step 300.00 Loss 0.09 
-Epoch train RMSE is: 0.06 
-Step 400.00 Loss 0.07 
-Epoch train RMSE is: 0.07 
-Step 500.00 Loss 0.09 
-Epoch train RMSE is: 0.07 
-Step 0.00 Loss 0.11 
-Epoch train RMSE is: 0.03 
-Step 100.00 Loss 0.08 
-Epoch train RMSE is: 0.06 
-Step 200.00 Loss 0.07 
-Epoch train RMSE is: 0.06 
-Step 300.00 Loss 0.08 
-Epoch train RMSE is: 0.05 
-Step 400.00 Loss 0.07 
-Epoch train RMSE is: 0.05 
+Step 100.00 Loss 0.22 
+Epoch train RMSE is: 0.50 
+Step 200.00 Loss 0.15 
+Epoch train RMSE is: 0.50 
+Step 300.00 Loss 0.13 
+Epoch train RMSE is: 0.50 
+Step 400.00 Loss 0.08 
+Epoch train RMSE is: 0.50 
 Step 500.00 Loss 0.08 
-Epoch train RMSE is: 0.05 
-Step 0.00 Loss 0.11 
-Epoch train RMSE is: 0.03 
-Step 100.00 Loss 0.08 
-Epoch train RMSE is: 0.05 
-Step 200.00 Loss 0.07 
-Epoch train RMSE is: 0.05 
-Step 300.00 Loss 0.08 
-Epoch train RMSE is: 0.04 
-Step 400.00 Loss 0.07 
-Epoch train RMSE is: 0.04 
-Step 500.00 Loss 0.08 
-Epoch train RMSE is: 0.04 
-Step 0.00 Loss 0.11 
-Epoch train RMSE is: 0.02 
-Step 100.00 Loss 0.08 
-Epoch train RMSE is: 0.04 
-Step 200.00 Loss 0.07 
-Epoch train RMSE is: 0.04 
-Step 300.00 Loss 0.08 
-Epoch train RMSE is: 0.04 
-Step 400.00 Loss 0.06 
-Epoch train RMSE is: 0.04 
-Step 500.00 Loss 0.08 
-Epoch train RMSE is: 0.04 
-Step 0.00 Loss 0.11 
-Epoch train RMSE is: 0.02 
-Step 100.00 Loss 0.08 
-Epoch train RMSE is: 0.04 
-Step 200.00 Loss 0.06 
-Epoch train RMSE is: 0.04 
-Step 300.00 Loss 0.08 
-Epoch train RMSE is: 0.03 
-Step 400.00 Loss 0.06 
-Epoch train RMSE is: 0.03 
-Step 500.00 Loss 0.08 
-Epoch train RMSE is: 0.03 
-Step 0.00 Loss 0.10 
-Epoch train RMSE is: 0.02 
-Step 100.00 Loss 0.08 
-Epoch train RMSE is: 0.03 
-Step 200.00 Loss 0.06 
-Epoch train RMSE is: 0.04 
-Step 300.00 Loss 0.08 
-Epoch train RMSE is: 0.03 
-Step 400.00 Loss 0.06 
-Epoch train RMSE is: 0.03 
-Step 500.00 Loss 0.08 
-Epoch train RMSE is: 0.03 
+Epoch train RMSE is: 0.50 

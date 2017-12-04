@@ -35,8 +35,11 @@ def read_dataset(path):
             
         if count >= STUDENTS_COUNT*3:
             break
-    add_padding(data, max_seq_len)
-    add_padding(labels, max_seq_len)
+#    add_padding(data, max_seq_len)
+#    add_padding(labels, max_seq_len)
+    add_padding(data, max(max_seq_len,num_steps + 1))
+    add_padding(labels, max(max_seq_len,num_steps + 1))
+
 
     return data, labels, seq_len, max_seq_len -1
 
@@ -70,12 +73,14 @@ class SlepeMapyData(object):
         self.batch_id = min(self.batch_id + batch_size, len(self.data))
         return batch_data, batch_labels, batch_target, batch_input_correct, batch_seqlen
 
-train_path = "./trainDataset.csv"
-test_path = "./testDataset.csv"
+train_path = "./builder_train_world_first.csv"
+test_path = "./builder_test_world_first.csv"
 ### DEBUG
 #train_path = "/home/dave/projects/datasets/builder_train.csv"
 #test_path = "/home/dave/projects/datasets/builder_test.csv"
+num_steps = 0
 train_set = SlepeMapyData(train_path)
+num_steps = train_set.max_seq_len 
 test_set = SlepeMapyData(test_path)
 
 num_epochs = 1000
@@ -226,8 +231,8 @@ with tf.Session() as sess:
 
         test_predictions = sess.run(predictions_series,
                         feed_dict={
-                            x:np.array(test_set.data)[:,1:],
-                            y:np.array(test_set.labels)[:,1:],
+                            x:(np.array(test_set.data)[:,1:]),
+                            y:(np.array(test_set.labels)[:,1:]),
                             seqlen:test_set.seqlen})
         pred_labels = []
         correct_labels = []
